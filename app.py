@@ -11,6 +11,160 @@ import streamlit.components.v1 as components
 
 CUSTOM = "✏️ Custom (type below)"
 
+# ── Character profile constants ──────────────────────────────────────────────
+
+CHAR_GENDERS: tuple[str, ...] = ("Unspecified", "Male", "Female", "Non-binary")
+
+CHAR_AGE_RANGES: tuple[str, ...] = (
+    "Unspecified",
+    "Teen (13–17)",
+    "Young Adult (18–29)",
+    "Adult (30–45)",
+    "Middle-Aged (46–60)",
+    "Senior (60+)",
+)
+
+CHAR_AGE_WORDS: dict[str, str] = {
+    "Unspecified":         "",
+    "Teen (13–17)":        "teenage",
+    "Young Adult (18–29)": "young adult",
+    "Adult (30–45)":       "adult",
+    "Middle-Aged (46–60)": "middle-aged",
+    "Senior (60+)":        "senior",
+}
+
+CHAR_BODY_TYPES: tuple[str, ...] = (
+    "Unspecified",
+    "Athletic",
+    "Slender",
+    "Curvy",
+    "Muscular",
+    "Average build",
+    "Plus-size",
+    "Petite",
+    "Stocky",
+    "Lean and wiry",
+)
+
+CHAR_BODY_TYPES_MATURE: tuple[str, ...] = (
+    "Voluptuous hourglass figure",
+    "Well-built and chiseled physique",
+    "Full-figured with prominent curves",
+    "Lean and toned with defined muscle",
+)
+
+CHAR_SKIN_TONES: tuple[str, ...] = (
+    "Unspecified",
+    "Fair / porcelain",
+    "Light",
+    "Medium",
+    "Olive",
+    "Tan",
+    "Brown",
+    "Dark",
+    "Deep ebony",
+)
+
+CHAR_HAIR_STYLES: tuple[str, ...] = (
+    "Unspecified",
+    "Short cropped",
+    "Undercut / fade",
+    "Medium length",
+    "Long flowing",
+    "Curly",
+    "Wavy",
+    "Braided / plaited",
+    "Afro",
+    "Bun / updo",
+    "Ponytail / half-up",
+    "Shaved / buzz cut",
+    "Dreadlocks",
+    "Bob cut",
+    "Slicked back",
+)
+
+CHAR_HAIR_COLORS: tuple[str, ...] = (
+    "Unspecified",
+    "Jet black",
+    "Dark brown",
+    "Medium brown",
+    "Light brown",
+    "Blonde",
+    "Platinum blonde",
+    "Auburn",
+    "Red",
+    "Gray / silver",
+    "White",
+    "Vibrant dyed — blue",
+    "Vibrant dyed — purple",
+    "Vibrant dyed — red",
+)
+
+CHAR_EYE_COLORS: tuple[str, ...] = (
+    "Unspecified",
+    "Brown",
+    "Dark brown",
+    "Blue",
+    "Light blue",
+    "Green",
+    "Hazel",
+    "Amber",
+    "Gray",
+    "Heterochromia",
+)
+
+CHAR_FACIAL_FEATURES: tuple[str, ...] = (
+    "Unspecified",
+    "Strong jawline",
+    "Soft / delicate features",
+    "High cheekbones",
+    "Sharp angular features",
+    "Round face",
+    "Oval face",
+    "Full lips",
+    "Freckled",
+    "Bearded — short stubble",
+    "Bearded — full beard",
+    "Clean-shaven",
+    "Scar across face",
+    "Dimples",
+)
+
+CHAR_ETHNICITY: tuple[str, ...] = (
+    "Unspecified",
+    "Caucasian / European",
+    "East Asian",
+    "South Asian",
+    "Southeast Asian",
+    "Middle Eastern",
+    "African / Black",
+    "Latino / Hispanic",
+    "Indigenous",
+    "Mixed / Multiracial",
+)
+
+CHAR_ACTIONS: tuple[str, ...] = (
+    "Unspecified",
+    "standing still, facing camera",
+    "walking slowly toward camera",
+    "running at full sprint",
+    "sitting and observing quietly",
+    "turning to look over shoulder",
+    "reaching out toward camera",
+    "looking up toward the sky",
+    "in a confident hero stance",
+    "fighting in a combat stance",
+    "embracing someone",
+    "speaking / delivering dialogue",
+    "laughing naturally",
+    "looking down contemplatively",
+    "crouching and hiding",
+    "dancing freely",
+    "working at a focused task",
+    "reacting in shock or fear",
+    "sprinting away from camera",
+)
+
 GENRES = [
     "Sci-Fi & Cyberpunk",
     "Horror & Supernatural",
@@ -1377,6 +1531,160 @@ CONTEXT_PRESETS: dict[str, dict[str, tuple[int, int, int, int, int]]] = {
 }
 
 
+# ── Genre-specific clothing libraries ────────────────────────────────────────
+
+GENRE_CLOTHING: dict[str, tuple[str, ...]] = {
+    "Sci-Fi & Cyberpunk": (
+        "hologram-lined trench coat with LED accent strips",
+        "tactical smart-fabric bodysuit with neon piping",
+        "AR visor and reflective puffer jacket",
+        "chrome-paneled armored exosuit with glowing joints",
+        "shredded denim with glow-mesh underlayers",
+        "corporate all-black seamless suit with rank pins",
+        "hacker hoodie with embedded circuitry patterns",
+        "biomechanical tactical vest over thermal underlayer",
+    ),
+    "Horror & Supernatural": (
+        "tattered Victorian nightgown",
+        "long dark hooded ritual robe",
+        "blood-soaked hospital gown",
+        "worn leather trench coat",
+        "Victorian mourning dress in black silk",
+        "period undergarments disheveled and soiled",
+        "nun's habit with stained hem",
+        "burial shroud loosely wrapped",
+    ),
+    "Romance & Drama": (
+        "elegant evening gown with open back",
+        "casual summer dress in soft cotton",
+        "sharp tailored suit with pocket square",
+        "oversized knit sweater and jeans",
+        "silk blouse with flowing wide-leg trousers",
+        "vintage 1950s tea dress",
+        "linen shirt open at the collar",
+        "bridal white with simple veil",
+    ),
+    "Action & Thriller": (
+        "tactical cargo pants and moisture-wicking shirt",
+        "all-black operative gear with kevlar panels",
+        "distressed leather jacket and dark jeans",
+        "military BDU uniform with patches",
+        "plain undercover civilian clothes",
+        "wetsuit with equipment harness",
+        "suit and tie with concealed holster",
+        "desert camouflage with load-bearing vest",
+    ),
+    "Fantasy & Mythic": (
+        "plate armor with embossed crest and flowing cape",
+        "elven ceremonial robes with constellation embroidery",
+        "barbarian furs and leather bracers",
+        "silk mage robes with runic trim",
+        "forest ranger cloak in earth tones",
+        "royal coronation gown with jeweled bodice",
+        "dark lord armor in black iron with red trim",
+        "priestess ceremonial white with gold sash",
+    ),
+    "Noir & Crime": (
+        "double-breasted pinstripe suit and fedora",
+        "silk evening gown and long gloves",
+        "worn detective mac coat and loosened tie",
+        "1940s tea dress with seamed stockings",
+        "sharp three-piece suit with pocket watch chain",
+        "diner waitress uniform",
+        "newsboy cap and suspenders over rolled sleeves",
+        "fur stole over cocktail dress",
+    ),
+    "Documentary & Realism": (
+        "everyday casual wear — jeans, T-shirt, trainers",
+        "workwear — hi-vis vest and hard hat",
+        "medical scrubs and stethoscope",
+        "field researcher vest with multiple pockets",
+        "school uniform",
+        "traditional cultural dress",
+        "athletic sportswear",
+        "rough-worn clothes of a manual laborer",
+    ),
+    "Comedy & Satire": (
+        "ill-fitting business suit two sizes too big",
+        "superhero costume visibly homemade",
+        "absurd matching couple outfits",
+        "formal tuxedo with novelty accessories",
+        "gym clothes worn inappropriately",
+        "full medieval armor in a modern setting",
+        "party outfit with visible wardrobe mishap",
+        "mascot costume unzipped mid-torso",
+    ),
+    "Historical & Period": (
+        "Victorian corset gown with bustle and gloves",
+        "samurai mon-crested kimono and hakama",
+        "Roman toga with laurel wreath",
+        "1920s flapper dress with fringe and headband",
+        "Regency-era pelisse coat over muslin dress",
+        "medieval plate armor with heraldic surcoat",
+        "pirate coat, tricorn hat, and sash",
+        "WWI officer's tunic with campaign ribbons",
+    ),
+    "Anime & Stylized": (
+        "school uniform with customized accessories",
+        "magical girl outfit with ribbon and wand",
+        "futuristic military uniform with anime silhouette",
+        "fantasy RPG adventurer ensemble",
+        "idol stage costume with light sticks motif",
+        "casual streetwear with oversized hoodie",
+        "demon lord robe with dramatic shoulder horns",
+        "maid or butler uniform with stylized details",
+    ),
+    "Nature & Landscape": (
+        "lightweight hiking gear and trail boots",
+        "wetsuit and fins for underwater footage",
+        "field naturalist vest and wide-brim hat",
+        "mountaineering base layer and down jacket",
+        "beachwear and bare feet in sand",
+        "winter parka and snow boots",
+        "yoga activewear in natural setting",
+        "minimal athleisure for outdoor sport",
+    ),
+    "Racing & Motorsport": (
+        "racing firesuit with sponsor patches and HANS device",
+        "motorcycle leathers with armor inserts and full-face helmet",
+        "rally co-driver suit with helmet and HANS collar",
+        "pit crew uniform with team branding",
+        "cycling skinsuit with aerodynamic helmet",
+        "speedboat captain polo with life vest",
+        "vintage Le Mans driver overalls and goggles",
+        "karting helmet and rib protector over suit",
+    ),
+    "Aviation & Aerial": (
+        "fighter pilot G-suit with helmet and oxygen mask",
+        "wingsuit with helmet and altimeter rig",
+        "hot air balloon pilot casual wear with radio",
+        "parachute rig over athletic gear",
+        "commercial pilot uniform with epaulettes",
+        "vintage leather flight jacket and goggles",
+        "base jumping helmet and container rig",
+        "paragliding harness over outdoor layers",
+    ),
+    "_default": (
+        "casual everyday clothing",
+        "formal business attire",
+        "athletic sportswear",
+        "smart casual — dark jeans and blazer",
+        "minimal plain white T-shirt and neutral trousers",
+    ),
+}
+
+MATURE_CLOTHING_GLOBAL: tuple[str, ...] = (
+    "sheer lace negligee with minimal coverage",
+    "open-front shirt with bare chest",
+    "bikini / swimwear with minimal coverage",
+    "silk robe loosely draped open",
+    "lingerie — satin and lace bra and briefs",
+    "low-cut dress with deep neckline",
+    "form-fitting bodycon dress",
+    "topless with strategic minimal coverage",
+)
+
+
 def _dedupe(items: list[str]) -> list[str]:
     seen: set[str] = set()
     out: list[str] = []
@@ -1385,6 +1693,79 @@ def _dedupe(items: list[str]) -> list[str]:
             seen.add(item)
             out.append(item)
     return out
+
+
+def get_clothing_options(genre: str, rating_key: str) -> list[str]:
+    base = list(GENRE_CLOTHING.get(genre, GENRE_CLOTHING["_default"]))
+    if rating_key == "mature":
+        base = _dedupe([*list(MATURE_CLOTHING_GLOBAL), *base])
+    return base
+
+
+def build_character_desc(
+    gender: str,
+    age_range: str,
+    body_type: str,
+    ethnicity: str,
+    skin_tone: str,
+    hair_style: str,
+    hair_color: str,
+    eye_color: str,
+    facial_features: str,
+    clothing: str,
+    action: str,
+) -> str:
+    U = "Unspecified"
+
+    def _v(s: str) -> str:
+        return s.strip() if s and s.strip() and s.strip() != U else ""
+
+    age_word   = CHAR_AGE_WORDS.get(age_range, "")
+    body       = _v(body_type)
+    eth        = _v(ethnicity)
+    skin       = _v(skin_tone)
+    h_style    = _v(hair_style)
+    h_color    = _v(hair_color)
+    eye        = _v(eye_color)
+    face       = _v(facial_features)
+    cloth      = _v(clothing)
+    act        = _v(action)
+    gender_set = gender not in (U, "")
+
+    if not gender_set and not any([age_word, body, eth, skin, h_style, h_color, eye, face, cloth, act]):
+        return ""
+
+    # Core noun phrase
+    core: list[str] = []
+    if age_word:
+        core.append(age_word)
+    if body:
+        core.append(body.lower())
+    core.append({"Male": "man", "Female": "woman", "Non-binary": "non-binary person"}.get(gender, "person"))
+    if eth:
+        core.append(f"of {eth.lower()} heritage")
+    desc = "a " + " ".join(core)
+
+    # Appearance clause
+    appearance: list[str] = []
+    if skin:
+        appearance.append(f"{skin.lower()} skin")
+    hair = [p for p in [h_style.lower() if h_style else "", h_color.lower() if h_color else ""] if p]
+    if hair:
+        appearance.append(" ".join(hair) + " hair")
+    if eye:
+        appearance.append(f"{eye.lower()} eyes")
+    if face:
+        appearance.append(face.lower())
+    if appearance:
+        desc += " with " + ", ".join(appearance)
+
+    if cloth:
+        desc += f", wearing {cloth}"
+    if act:
+        desc += f", {act}"
+
+    return desc
 
 
 def get_option_lists(genre: str, theme: str, rating_key: str) -> dict[str, list[str]]:
@@ -1439,12 +1820,14 @@ def build_prompt(
     environment: str,
     lighting: str,
     atmosphere: str,
+    character_desc: str = "",
 ) -> str:
     """
     Assemble a Veo 3.1 / Google Flow prompt:
     [Cinematography + Subject] + [Context] + [Lighting] + [Style & ambiance].
     """
-    cinematography = f"{shot.strip()} {subject.strip()}".strip()
+    effective_subject = character_desc.strip() if character_desc.strip() else subject.strip()
+    cinematography = f"{shot.strip()} {effective_subject}".strip()
     context = _format_environment(environment)
     lighting_line = _format_lighting(lighting)
 
@@ -1477,10 +1860,19 @@ def resolve(selected: str, custom: str) -> str:
     return custom.strip() if selected == CUSTOM else selected.strip()
 
 
+_CHAR_PLAIN_KEYS = ("c_gender", "c_age", "c_body", "c_skin", "c_eye")
+
+
 def clear_picker_state() -> None:
     for key in list(st.session_state.keys()):
         if key.endswith("_sel") or key.endswith("_txt"):
             st.session_state.pop(key, None)
+
+
+def clear_character_state() -> None:
+    for key in _CHAR_PLAIN_KEYS:
+        st.session_state.pop(key, None)
+    st.session_state.pop("char_enabled", None)
 
 
 def picker(label: str, help_text: str, options: list[str], key: str, index: int = 0) -> str:
@@ -1592,8 +1984,9 @@ def main() -> None:
         st.header("Workflow")
         st.markdown(
             "0. **Genre · Theme · Rating**\n"
+            "↳ **Character Profile** _(optional)_\n"
             "1. **Shot + Camera**\n"
-            "2. **Subject**\n"
+            "2. **Subject** _(or character overrides it)_\n"
             "3. **Environment**\n"
             "4. **Lighting**\n"
             "5. **Atmosphere**"
@@ -1613,6 +2006,7 @@ def main() -> None:
             st.session_state["theme"] = THEMES[0]
             st.session_state["rating_label"] = list(CONTENT_RATINGS.keys())[0]
             clear_picker_state()
+            clear_character_state()
             apply_preset(
                 st.session_state["genre"],
                 st.session_state["theme"],
@@ -1679,6 +2073,73 @@ def main() -> None:
                     apply_preset(genre, theme, rating_label, idx, name)
                     st.rerun()
 
+    # ── Character Profile ─────────────────────────────────────────────────────
+    rating_key_now = CONTENT_RATINGS[rating_label]
+    with st.expander("👤 Character Profile  ·  optional  —  overrides the Subject picker when active"):
+        char_enabled = st.toggle("Enable character profile", key="char_enabled", value=False)
+
+        character_desc = ""
+        if char_enabled:
+            if rating_key_now == "mature":
+                st.caption("18+ mode active: mature body options and clothing included. Teen age hidden.")
+
+            cp1, cp2, cp3 = st.columns(3)
+
+            with cp1:
+                st.markdown("**Identity**")
+                c_gender = st.selectbox(
+                    "Gender", CHAR_GENDERS, index=0, key="c_gender",
+                    help="Character's gender presentation for the scene.",
+                )
+                age_opts = [a for a in CHAR_AGE_RANGES if not (a == "Teen (13–17)" and rating_key_now == "mature")]
+                c_age = st.selectbox("Age range", age_opts, index=0, key="c_age")
+                body_opts = list(CHAR_BODY_TYPES) + (list(CHAR_BODY_TYPES_MATURE) if rating_key_now == "mature" else [])
+                c_body = st.selectbox("Body type", body_opts, index=0, key="c_body")
+                c_ethnicity = picker(
+                    "Ethnicity / Appearance", "Casting look and heritage.",
+                    list(CHAR_ETHNICITY), "c_eth", 0,
+                )
+
+            with cp2:
+                st.markdown("**Appearance**")
+                c_skin = st.selectbox("Skin tone", CHAR_SKIN_TONES, index=0, key="c_skin")
+                c_hair_style = picker(
+                    "Hair style", "Cut, length, and structure.",
+                    list(CHAR_HAIR_STYLES), "c_hstyle", 0,
+                )
+                c_hair_color = picker(
+                    "Hair color", "Natural or dyed color.",
+                    list(CHAR_HAIR_COLORS), "c_hcolor", 0,
+                )
+                c_eye = st.selectbox("Eye color", CHAR_EYE_COLORS, index=0, key="c_eye")
+                c_facial = picker(
+                    "Facial features", "Distinguishing face details.",
+                    list(CHAR_FACIAL_FEATURES), "c_face", 0,
+                )
+
+            with cp3:
+                st.markdown("**Styling & Action**")
+                clothing_opts = get_clothing_options(genre, rating_key_now)
+                c_clothing = picker(
+                    "Clothing", "Outfit and costume — genre-matched options.",
+                    clothing_opts, "c_cloth", 0,
+                )
+                c_action = picker(
+                    "Action / Pose", "What the character is doing in frame.",
+                    list(CHAR_ACTIONS), "c_act", 0,
+                )
+
+            character_desc = build_character_desc(
+                c_gender, c_age, c_body, c_ethnicity, c_skin,
+                c_hair_style, c_hair_color, c_eye, c_facial,
+                c_clothing, c_action,
+            )
+
+            if character_desc:
+                st.success(f"**Character:** {character_desc}")
+            else:
+                st.caption("Set at least one field above to activate. When active, this replaces the Subject picker.")
+
     st.divider()
 
     c1, c2 = st.columns(2)
@@ -1692,13 +2153,17 @@ def main() -> None:
             0,
         )
         st.subheader("2 · Subject")
-        subject = picker(
-            "Subject + action",
-            "Who/what — include a visible action or gesture for stronger motion in Flow.",
-            opts["subjects"],
-            "subject",
-            0,
-        )
+        if char_enabled and character_desc:
+            st.info(f"**Character profile active** — Subject overridden. See expander above to adjust.")
+            subject = character_desc
+        else:
+            subject = picker(
+                "Subject + action",
+                "Who/what — include a visible action or gesture for stronger motion in Flow.",
+                opts["subjects"],
+                "subject",
+                0,
+            )
         st.subheader("3 · Environment")
         environment = picker("Environment / setting", "Location and world context.", opts["environments"], "env", 0)
     with c2:
@@ -1715,9 +2180,10 @@ def main() -> None:
                 st.error("Complete all sections (including custom text fields).")
             else:
                 st.session_state["prompt"] = build_prompt(
-                    genre, theme, rating_label, shot, subject, environment, lighting, atmosphere
+                    genre, theme, rating_label, shot, subject, environment, lighting, atmosphere,
+                    character_desc=character_desc,
                 )
-                st.session_state["breakdown"] = {
+                breakdown: dict[str, str] = {
                     "Genre": genre,
                     "Theme": theme,
                     "Content": rating_label,
@@ -1727,6 +2193,9 @@ def main() -> None:
                     "Lighting": lighting,
                     "Atmosphere": atmosphere,
                 }
+                if char_enabled and character_desc:
+                    breakdown["Character Profile"] = character_desc
+                st.session_state["breakdown"] = breakdown
                 st.session_state.pop("preset_name", None)
                 st.rerun()
 
