@@ -1,0 +1,28 @@
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+.env/
+env/
+
+# Media files (user uploads)
+media/
+
+# Logs
+*.log
+*.md
+
+# macOS
+.DS_Store
+
+# IDEs
+.vscode/
+.idea/
+
+#excel files
+.cursor/
+.claude/
+.gemini/
