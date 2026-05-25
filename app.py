@@ -1886,6 +1886,7 @@ def picker(label: str, help_text: str, options: list[str], key: str, index: int 
 
 def render_copy_button(text: str, label: str = "Copy Prompt") -> None:
     payload = json.dumps(text)
+    label_json = json.dumps(label)
     components.html(
         f"""
         <button id="copy-prompt-btn" style="
@@ -1898,16 +1899,51 @@ def render_copy_button(text: str, label: str = "Copy Prompt") -> None:
             font-size: 0.875rem;
             font-weight: 500;
             cursor: pointer;
+            transition: background 0.15s;
         ">{label}</button>
         <script>
-        document.getElementById("copy-prompt-btn").onclick = function() {{
-            navigator.clipboard.writeText({payload}).then(function() {{
-                var btn = document.getElementById("copy-prompt-btn");
-                var original = {json.dumps(label)};
-                btn.textContent = "Copied!";
-                setTimeout(function() {{ btn.textContent = original; }}, 1500);
-            }});
-        }});
+        (function() {{
+            var btn = document.getElementById("copy-prompt-btn");
+            var text = {payload};
+            var original = {label_json};
+
+            function markSuccess() {{
+                btn.textContent = "✓ Copied!";
+                btn.style.background = "#d4edda";
+                btn.style.color = "#155724";
+                setTimeout(function() {{
+                    btn.textContent = original;
+                    btn.style.background = "";
+                    btn.style.color = "";
+                }}, 1600);
+            }}
+
+            function markFail() {{
+                btn.textContent = "Copy failed — select text above";
+                setTimeout(function() {{ btn.textContent = original; }}, 2500);
+            }}
+
+            function execFallback() {{
+                var ta = document.createElement("textarea");
+                ta.value = text;
+                ta.style.cssText = "position:fixed;top:0;left:0;width:2em;height:2em;opacity:0;";
+                document.body.appendChild(ta);
+                ta.focus();
+                ta.select();
+                var ok = false;
+                try {{ ok = document.execCommand("copy"); }} catch(e) {{}}
+                document.body.removeChild(ta);
+                ok ? markSuccess() : markFail();
+            }}
+
+            btn.onclick = function() {{
+                if (navigator.clipboard && window.isSecureContext) {{
+                    navigator.clipboard.writeText(text).then(markSuccess, execFallback);
+                }} else {{
+                    execFallback();
+                }}
+            }};
+        }})();
         </script>
         """,
         height=48,
