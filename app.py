@@ -44,6 +44,48 @@ CONTENT_RATINGS = {
     "Uncensored 18+ (mature)": "mature",
 }
 
+# Veo 3.1 / Google Flow style anchors (woven into every generated prompt)
+GENRE_STYLE: dict[str, str] = {
+    "Sci-Fi & Cyberpunk": "sci-fi cinematic realism, premium VFX polish",
+    "Horror & Supernatural": "horror cinematic realism, practical dread",
+    "Romance & Drama": "prestige romance-drama cinematography",
+    "Action & Thriller": "high-impact action cinematography, kinetic clarity",
+    "Fantasy & Mythic": "epic fantasy cinematic scale",
+    "Noir & Crime": "classic noir crime cinematography",
+    "Documentary & Realism": "documentary vérité realism",
+    "Comedy & Satire": "sharp comedic framing with clean readability",
+    "Historical & Period": "period-accurate historical cinematic texture",
+    "Anime & Stylized": "stylized animated cinematic composition",
+}
+
+THEME_MOOD: dict[str, str] = {
+    "Dystopian Future": "dystopian tension and societal decay",
+    "Forbidden Love": "forbidden desire and emotional restraint",
+    "Revenge Arc": "vengeful intensity and rising stakes",
+    "Survival / Last Stand": "survival desperation and physical strain",
+    "Coming of Age": "youthful transition and bittersweet growth",
+    "Heist & Betrayal": "covert tension and double-cross energy",
+    "Cosmic Wonder": "awe-filled cosmic scale",
+    "Urban Isolation": "lonely urban melancholy",
+    "War & Sacrifice": "wartime gravity and moral weight",
+    "Surreal Dreamscape": "surreal dream logic and uncanny calm",
+    "Celebration & Joy": "joyful uplift and communal energy",
+    "Hunt / Pursuit": "relentless pursuit and escalating pace",
+}
+
+PRO_BASELINE = (
+    "Photorealistic cinematic video, stable camera motion, coherent anatomy, "
+    "natural movement, sharp subject focus, high detail, filmic color grade."
+)
+PRO_EXCLUDE_SAFE = (
+    "Family-safe framing. No logos, no on-screen text, no watermarks, "
+    "no distorted faces or hands, no flicker."
+)
+PRO_EXCLUDE_MATURE = (
+    "Adults-only tone. No logos, no on-screen text, no watermarks, "
+    "no distorted faces or hands, no flicker."
+)
+
 
 @dataclass(frozen=True)
 class OptionPack:
@@ -877,41 +919,64 @@ THEME_OVERLAYS: dict[str, dict[str, tuple[str, ...]]] = {
 MATURE_OVERLAYS: dict[str, dict[str, tuple[str, ...]]] = {
     "_global": {
         "shots": (
-            "Intimate shallow rack-focus drifting across",
-            "Unflinching close-up hold on",
+            "Languid shallow rack-focus caressing across",
+            "Unblinking intimate close-up lingering on",
+            "Slow push-in through parted curtains toward",
         ),
         "lighting": (
-            "moody boudoir practical with deep shadow falloff",
-            "single-source bedroom lamp with warm skin tones",
+            "sultry boudoir practicals with deep shadow falloff sculpting form",
+            "a single bedside lamp with warm honeyed skin tones and soft falloff",
+            "warm candlelight with soft key tracing collarbones in velvet darkness",
         ),
         "atmospheres": (
-            "raw intimate grain, adults-only tone",
-            "unflinching vérité texture, mature audience",
+            "sensual 35mm film grain, shallow depth of field, after-midnight intimacy",
+            "unfiltered vérité texture, skin-close framing, prestige R-rated polish",
+            "charged intimacy with subtle lens breathing and cinematic motion blur",
         ),
     },
     "Horror & Supernatural": {
         "subjects": (
-            "a visceral creature with exposed muscle and sinew",
-            "a victim silhouette splattered with practical blood mist",
+            "a flesh-revealing creature glistening with wet muscle and sinew",
+            "a crimson-splashed silhouette dissolving in practical blood mist",
+            "a bare-shouldered survivor pressed against a blood-streaked wall",
         ),
-        "atmospheres": ("crushed blacks, disturbing practical gore haze",),
+        "atmospheres": (
+            "crushed blacks, visceral gore haze you can almost taste",
+            "wet leather and copper breath, forbidden midnight appetite",
+        ),
     },
     "Romance & Drama": {
         "subjects": (
-            "lovers in silk-sheet silhouette behind gauze curtain",
-            "a passionate embrace in steam-fogged bathroom mirror",
+            "entwined lovers swaying in silk-sheet silhouette behind billowing gauze",
+            "lovers locked in a fevered embrace fogging a steam-clouded bathroom mirror",
+            "a woman with bare shoulders and parted lips exhaling in post-kiss candlelight",
+            "fingers slowly tracing a collarbone through tangled bed sheets",
         ),
-        "lighting": ("silhouette backlight through sheer fabric, mature tone",),
+        "lighting": (
+            "molten backlight through sheer linen with glowing skin rim",
+            "golden-hour rim light with soft sweat highlights on bare shoulders",
+        ),
+        "atmospheres": (
+            "breath on glass, aching desire, prestige R-rated sensuality, shallow depth of field",
+        ),
     },
     "Action & Thriller": {
-        "subjects": ("a bruised antihero wiping blood with a sleeve",),
-        "atmospheres": ("practical squib mist, R-rated impact texture",),
+        "subjects": (
+            "a battered antihero dragging blood-smeared knuckles across jawline",
+            "a disheveled operative peeling off a soaked tank top in rain",
+        ),
+        "atmospheres": (
+            "practical squib mist hanging thick, R-rated impact viscerality",
+            "sweat-slick adrenaline, bruised glamour, dangerous magnetism",
+        ),
     },
     "Noir & Crime": {
         "subjects": (
-            "a femme fatale adjusting stocking in shadowed motel room",
-            "an interrogation sweat close-up under bare bulb",
+            "a femme fatale slowly rolling a silk stocking up her bare thigh in a shadowed motel",
+            "a suspect sweating through a tense confession under a swaying bare bulb",
+            "a femme fatale lighting a lipstick-stained cigarette beside an undone blouse",
         ),
+        "lighting": ("smoke-wreathed key light with hard noir contrast and deep shadows",),
     },
 }
 
@@ -994,6 +1059,26 @@ def get_option_lists(genre: str, theme: str, rating_key: str) -> dict[str, list[
     return lists
 
 
+def _format_environment(environment: str) -> str:
+    env = environment.strip()
+    if not env:
+        return ""
+    lower = env.lower()
+    if lower.startswith(("in ", "at ", "on ", "inside ", "within ", "set in ", "against ")):
+        return env
+    return f"set in {env}"
+
+
+def _format_lighting(lighting: str) -> str:
+    light = lighting.strip()
+    if not light:
+        return ""
+    lower = light.lower()
+    if lower.startswith(("the scene is lit", "lit by", "lighting:", "illuminated")):
+        return light[0].upper() + light[1:] if light and light[0].islower() else light
+    return f"The scene is lit by {light}"
+
+
 def build_prompt(
     genre: str,
     theme: str,
@@ -1004,9 +1089,37 @@ def build_prompt(
     lighting: str,
     atmosphere: str,
 ) -> str:
-    core = f"{shot} {subject}, {environment}, {lighting}, {atmosphere}"
-    tone = "mature 18+ cinematic tone" if CONTENT_RATINGS[rating_label] == "mature" else "broadcast-safe cinematic tone"
-    return f"[{genre} · {theme} · {tone}] {core}"
+    """
+    Assemble a Veo 3.1 / Google Flow prompt:
+    [Cinematography + Subject] + [Context] + [Lighting] + [Style & ambiance].
+    """
+    cinematography = f"{shot.strip()} {subject.strip()}".strip()
+    context = _format_environment(environment)
+    lighting_line = _format_lighting(lighting)
+
+    rating_key = CONTENT_RATINGS[rating_label]
+    style_parts = [
+        atmosphere.strip(),
+        GENRE_STYLE.get(genre, "cinematic realism"),
+        THEME_MOOD.get(theme, ""),
+    ]
+    if rating_key == "mature":
+        style_parts.append("mature R-rated cinematic tone")
+        exclusions = PRO_EXCLUDE_MATURE
+    else:
+        style_parts.append("broadcast-safe family-friendly tone")
+        exclusions = PRO_EXCLUDE_SAFE
+
+    opening = cinematography
+    if context:
+        opening = f"{cinematography}, {context}"
+
+    sentences = [f"{opening}."]
+    if lighting_line:
+        sentences.append(f"{lighting_line}.")
+    style_clause = ", ".join(part for part in style_parts if part)
+    sentences.append(f"{style_clause}. {PRO_BASELINE} {exclusions}")
+    return " ".join(sentences)
 
 
 def resolve(selected: str, custom: str) -> str:
@@ -1137,10 +1250,11 @@ def main() -> None:
         st.divider()
         st.subheader("Expert example")
         st.code(
-            "[Sci-Fi & Cyberpunk · Dystopian Future · broadcast-safe] "
             "Low-angle tracking shot, tracking a chrome android with exposed servo joints, "
-            "smog-choked megacity rooftop with drone traffic lanes, "
-            "neon magenta and cyan cross-lighting, volumetric fog, cinematic ultra-realism.",
+            "set in smog-choked megacity rooftop with drone traffic lanes. "
+            "The scene is lit by neon magenta and cyan cross-lighting with wet reflections. "
+            "volumetric fog, cinematic ultra-realism, sci-fi cinematic realism, dystopian tension, "
+            "broadcast-safe family-friendly tone. Photorealistic cinematic video…"
         )
         st.divider()
         if st.button("Reset all to defaults", use_container_width=True):
@@ -1158,12 +1272,10 @@ def main() -> None:
             st.rerun()
 
     st.markdown(
-        '<div class="formula"><strong>Formula:</strong> '
-        "<code>[Genre · Theme · Tone]</code> + "
-        "<code>[Shot + Camera]</code> → <code>[Subject]</code> → "
-        "<code>[Environment]</code> → <code>[Lighting]</code> → "
-        "<code>[Atmosphere]</code><br><br>"
-        "<em>Primary selections reshape every dropdown below.</em></div>",
+        '<div class="formula"><strong>Veo 3.1 formula:</strong> '
+        "<code>[Cinematography + Subject]</code> → <code>[Context / Environment]</code> → "
+        "<code>[Lighting]</code> → <code>[Style + Genre + Theme + Quality]</code><br><br>"
+        "<em>Genre, theme, and rating shape options and the closing style line.</em></div>",
         unsafe_allow_html=True,
     )
 
@@ -1221,9 +1333,21 @@ def main() -> None:
     c1, c2 = st.columns(2)
     with c1:
         st.subheader("1 · Shot + Camera")
-        shot = picker("Shot type & camera move", "Angle, movement, framing.", opts["shots"], "shot", 0)
+        shot = picker(
+            "Shot type & camera move",
+            "Camera composition and movement (dolly, tracking, close-up, etc.).",
+            opts["shots"],
+            "shot",
+            0,
+        )
         st.subheader("2 · Subject")
-        subject = picker("Subject core details", "Who/what — specific visual details.", opts["subjects"], "subject", 0)
+        subject = picker(
+            "Subject + action",
+            "Who/what — include a visible action or gesture for stronger motion in Flow.",
+            opts["subjects"],
+            "subject",
+            0,
+        )
         st.subheader("3 · Environment")
         environment = picker("Environment / setting", "Location and world context.", opts["environments"], "env", 0)
     with c2:
@@ -1262,7 +1386,7 @@ def main() -> None:
         st.success(f"Preset loaded: **{st.session_state['preset_name']}** — edit sections or regenerate.")
 
     prompt = st.session_state["prompt"]
-    st.text_area("Copy into Google Flow", value=prompt, height=120)
+    st.text_area("Copy into Google Flow", value=prompt, height=180)
 
     m1, m2, m3, m4 = st.columns(4)
     m1.metric("Characters", len(prompt))
@@ -1278,7 +1402,9 @@ def main() -> None:
 
     st.info(
         "Pick **genre**, **theme**, and **content rating** first — options below adapt. "
-        "Then **Generate Prompt** → **Copy Prompt** or the text area → Google Flow."
+        "Choose subjects with clear **action** when possible. "
+        "Then **Generate Prompt** → paste into Google Flow (Veo 3.1). "
+        "Use **ingredients** or **start/end frames** in Flow when you need character consistency."
     )
 
 
