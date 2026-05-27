@@ -9,7 +9,7 @@ Streamlit app that builds professional cinematographic prompts for [Google Flow]
 ## Run locally
 
 ```bash
-cd google-flow-prompt-generator
+cd google-flow-helper
 pip install -r requirements.txt
 streamlit run app.py
 ```
